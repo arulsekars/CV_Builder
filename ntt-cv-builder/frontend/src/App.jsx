@@ -5,6 +5,7 @@
  */
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useWebSocket } from './hooks/useWebSocket'
+import { useVoice } from './hooks/useVoice'
 import { createSession } from './lib/api'
 import ChatPanel from './components/ChatPanel'
 import PreviewPanel from './components/PreviewPanel'
@@ -20,6 +21,7 @@ export default function App() {
   const [isThinking, setIsThinking] = useState(false)
   const [validationData, setValidationData] = useState(null)
   const [progress, setProgress] = useState(null)
+  const voice = useVoice()
 
   // Init session on mount
   useEffect(() => {
@@ -36,6 +38,7 @@ export default function App() {
       case 'message':
         setIsThinking(false)
         setMessages(prev => [...prev, { role: 'assistant', content: data, id: Date.now() }])
+        voice.speak(data)
         break
 
       case 'cv_update':
@@ -123,6 +126,7 @@ export default function App() {
           cvData={cvData}
           validationData={validationData}
           stage={stage}
+          voice={voice}
         />
 
         {showPreviewPanel && (

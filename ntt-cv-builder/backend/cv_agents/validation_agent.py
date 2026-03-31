@@ -7,7 +7,7 @@ follow-up questions for any gaps. One gap = one question.
 import logging
 from typing import List, Optional, Tuple
 from openai import AsyncOpenAI
-from backend.core.schema import CVData
+from core.schema import CVData
 
 logger = logging.getLogger(__name__)
 

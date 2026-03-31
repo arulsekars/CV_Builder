@@ -13,7 +13,7 @@ import uuid
 import structlog
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from agents.orchestrator import CVOrchestrator
+from cv_agents.orchestrator import CVOrchestrator
 
 router = APIRouter()
 log = structlog.get_logger()

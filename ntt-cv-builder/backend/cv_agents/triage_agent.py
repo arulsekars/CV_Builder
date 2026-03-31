@@ -10,7 +10,7 @@ from typing import Any, Dict, Optional
 
 from openai import AsyncOpenAI
 
-from backend.core.schema import CVData, CVSession, ConversationStage
+from core.schema import CVData, CVSession, ConversationStage
 
 logger = logging.getLogger(__name__)
 
