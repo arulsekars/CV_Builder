@@ -1,0 +1,151 @@
+"""
+Triage / Conversation Agent
+───────────────────────────
+Entry point agent. Drives the conversation, detects user intent,
+routes to specialist agents, and asks follow-up questions for missing fields.
+"""
+import json
+import logging
+from typing import Any, Dict, Optional
+
+from openai import AsyncOpenAI
+
+from backend.core.schema import CVData, CVSession, ConversationStage
+
+logger = logging.getLogger(__name__)
+
+SYSTEM_PROMPT = """You are Alex, a friendly and professional CV writing assistant for Contoso.
+Your job is to help employees build outstanding CVs through natural conversation.
+
+## Your Personality
+- Warm, encouraging, and concise
+- Ask ONE question at a time — never overwhelm with multiple questions
+- Celebrate progress: acknowledge when a section is complete
+- Professional but conversational (not robotic)
+
+## Conversation Flow
+1. GREETING: Welcome the user. Ask if they have an existing CV to upload or want to start fresh.
+2. COLLECTING: Gather CV information section by section — personal details, work history, education, skills, achievements.
+3. VALIDATING: When data looks complete, confirm and ask if they want to choose a template.
+4. TEMPLATE_PICK: Present 3 templates (modern, classic, minimal) and ask them to choose.
+5. PREVIEWING: Tell them the preview is ready and ask if they're happy or want changes.
+6. DONE: Congratulate, provide download links.
+
+## Rules
+- Extract structured data from the user's free-text answers
+- If the user uploads a CV, acknowledge it and confirm the extracted information
+- For work experience, always ask for: job title, company, dates, and 2-3 key achievements
+- Keep your responses SHORT (2-4 sentences max) unless presenting a list
+- Never mention technical implementation details (agents, RAG, ChromaDB, etc.)
+
+## Output Format
+Respond in JSON with two fields:
+{
+  "message": "Your conversational reply to the user",
+  "extracted_data": { ...any CV fields you extracted from the user's message... },
+  "next_stage": "current or next stage name",
+  "ready_for_template": false
+}
+
+Stages: greeting, choose_path, collecting, enriching, validating, template_pick, previewing, generating, done
+"""
+
+
+async def run_triage_agent(
+    user_message: str,
+    session: CVSession,
+    client: AsyncOpenAI,
+    model: str = "gpt-4o",
+) -> Dict[str, Any]:
+    """
+    Run the triage/conversation agent for one turn.
+    Returns dict with 'reply', 'updated_cv_data', 'next_stage'.
+    """
+
+    # Build conversation context
+    history = []
+    for msg in session.recent_messages(n=12):
+        history.append({"role": msg.role, "content": msg.content})
+
+    # Add current CV state as context
+    cv_context = f"\n\n## Current CV Data\n{session.cv_data.model_dump_json(indent=2)}"
+    cv_context += f"\n\n## Completion: {session.cv_data.completion_pct()}%"
+    cv_context += f"\n## Current Stage: {session.stage.value}"
+
+    missing = session.cv_data.missing_required_fields()
+    if missing:
+        cv_context += f"\n## Missing Required Fields: {', '.join(missing)}"
+
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT + cv_context},
+        *history,
+        {"role": "user", "content": user_message},
+    ]
+
+    try:
+        response = await client.chat.completions.create(
+            model=model,
+            messages=messages,
+            response_format={"type": "json_object"},
+            temperature=0.7,
+            max_tokens=1000,
+        )
+
+        raw = response.choices[0].message.content
+        data = json.loads(raw)
+
+        # Merge extracted CV data
+        extracted = data.get("extracted_data", {})
+        updated_cv = _merge_cv_data(session.cv_data, extracted)
+
+        # Determine next stage
+        next_stage_str = data.get("next_stage", session.stage.value)
+        try:
+            next_stage = ConversationStage(next_stage_str)
+        except ValueError:
+            next_stage = session.stage
+
+        return {
+            "reply": data.get("message", "I'm here to help! Could you tell me a bit about yourself?"),
+            "updated_cv_data": updated_cv,
+            "next_stage": next_stage,
+        }
+
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON parse error from triage agent: {e}")
+        return {
+            "reply": "I'm here to help build your CV! Could you start by telling me your name and current job title?",
+            "updated_cv_data": session.cv_data,
+            "next_stage": session.stage,
+        }
+    except Exception as e:
+        logger.error(f"Triage agent error: {e}")
+        raise
+
+
+def _merge_cv_data(existing: CVData, extracted: dict) -> CVData:
+    """Merge newly extracted fields into existing CV data (non-destructive)."""
+    if not extracted:
+        return existing
+
+    current = existing.model_dump()
+
+    for key, value in extracted.items():
+        if key not in current:
+            continue
+        if value is None:
+            continue
+        # For lists, extend rather than replace
+        if isinstance(current[key], list) and isinstance(value, list):
+            seen = {str(item) for item in current[key]}
+            for item in value:
+                if str(item) not in seen:
+                    current[key].append(item)
+                    seen.add(str(item))
+        elif isinstance(current[key], list) and isinstance(value, dict):
+            current[key].append(value)
+        elif current[key] is None or current[key] == "":
+            current[key] = value
+        # Don't overwrite existing non-null values unless explicitly empty
+
+    return CVData.model_validate(current)

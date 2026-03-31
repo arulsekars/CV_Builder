@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10pt; color: #111827;
+    background: #fff; padding: 0; max-width: 780px; margin: 0 auto;
+  }
+  .sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0; width: 210px;
+    background: #0f172a; padding: 36px 22px; color: #e2e8f0;
+  }
+  .main { margin-left: 210px; padding: 32px 36px; }
+  .name { font-size: 20pt; font-weight: 700; color: #fff; margin-bottom: 4px; line-height: 1.15; }
+  .target-role { font-size: 9.5pt; color: #00e5a0; font-weight: 500; margin-bottom: 20px; }
+  .sidebar-section { margin-bottom: 22px; }
+  .sidebar-title { font-size: 8pt; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; color: #00e5a0; margin-bottom: 8px; }
+  .sidebar-item { font-size: 8.5pt; color: #cbd5e1; margin-bottom: 5px; word-break: break-word; }
+  .skill-bar-name { font-size: 8.5pt; color: #e2e8f0; margin-bottom: 2px; }
+  .skill-bar-track { height: 3px; background: #1e293b; border-radius: 2px; margin-bottom: 7px; }
+  .skill-bar-fill { height: 3px; background: #00e5a0; border-radius: 2px; }
+  .section-title {
+    font-size: 8.5pt; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+    color: #0f172a; border-left: 3px solid #00e5a0; padding-left: 8px;
+    margin-bottom: 14px; margin-top: 22px;
+  }
+  .section-title:first-child { margin-top: 0; }
+  .role { margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid #f1f5f9; }
+  .role:last-child { border-bottom: none; }
+  .role-header { display: flex; justify-content: space-between; align-items: baseline; }
+  .role-title { font-size: 11pt; font-weight: 600; }
+  .role-dates { font-size: 8.5pt; color: #6b7280; white-space: nowrap; }
+  .role-company { font-size: 9.5pt; color: #6b7280; margin-bottom: 6px; }
+  .role-bullets { padding-left: 14px; }
+  .role-bullets li { margin-bottom: 3px; font-size: 9.5pt; }
+  .edu-item { margin-bottom: 10px; }
+  .edu-degree { font-weight: 600; font-size: 10pt; }
+  .edu-inst { font-size: 9pt; color: #6b7280; }
+  .summary { font-size: 10pt; color: #374151; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="name">{{ cv.contact.full_name or 'Your Name' }}</div>
+  <div class="target-role">{{ cv.target_role or '' }}</div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-title">Contact</div>
+    {% if cv.contact.email %}<div class="sidebar-item">✉ {{ cv.contact.email }}</div>{% endif %}
+    {% if cv.contact.phone %}<div class="sidebar-item">📞 {{ cv.contact.phone }}</div>{% endif %}
+    {% if cv.contact.location %}<div class="sidebar-item">📍 {{ cv.contact.location }}</div>{% endif %}
+    {% if cv.contact.linkedin_url %}<div class="sidebar-item">🔗 {{ cv.contact.linkedin_url }}</div>{% endif %}
+  </div>
+
+  {% if cv.skills %}
+  <div class="sidebar-section">
+    <div class="sidebar-title">Skills</div>
+    {% for skill in cv.skills[:12] %}
+    <div class="skill-bar-name">{{ skill.name }}</div>
+    <div class="skill-bar-track">
+      {% set width = {'expert': 95, 'advanced': 78, 'intermediate': 58, 'beginner': 35}.get(skill.level.value if skill.level else 'intermediate', 65) %}
+      <div class="skill-bar-fill" style="width:{{ width }}%"></div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if cv.languages %}
+  <div class="sidebar-section">
+    <div class="sidebar-title">Languages</div>
+    {% for lang in cv.languages %}
+    <div class="sidebar-item">{{ lang.language }} — {{ lang.proficiency }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if cv.certifications %}
+  <div class="sidebar-section">
+    <div class="sidebar-title">Certifications</div>
+    {% for cert in cv.certifications %}
+    <div class="sidebar-item">{{ cert.name }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+
+<div class="main">
+  {% if cv.professional_summary %}
+  <div class="section-title">About</div>
+  <p class="summary">{{ cv.professional_summary }}</p>
+  {% endif %}
+
+  {% if cv.work_experience %}
+  <div class="section-title">Experience</div>
+  {% for role in cv.work_experience %}
+  <div class="role">
+    <div class="role-header">
+      <span class="role-title">{{ role.job_title }}</span>
+      {% if role.start_date %}
+      <span class="role-dates">{{ role.start_date }} – {{ 'Present' if role.is_current else (role.end_date or '') }}</span>
+      {% endif %}
+    </div>
+    <div class="role-company">{{ role.company }}{% if role.location %} · {{ role.location }}{% endif %}</div>
+    {% if role.bullet_points %}
+    <ul class="role-bullets">{% for b in role.bullet_points %}<li>{{ b }}</li>{% endfor %}</ul>
+    {% elif role.description %}
+    <p style="font-size:9.5pt;color:#374151">{{ role.description }}</p>
+    {% endif %}
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  {% if cv.education %}
+  <div class="section-title">Education</div>
+  {% for edu in cv.education %}
+  <div class="edu-item">
+    <div class="edu-degree">{{ edu.degree }}</div>
+    <div class="edu-inst">{{ edu.institution }}{% if edu.grade %} · {{ edu.grade }}{% endif %}{% if edu.end_date %} · {{ edu.end_date }}{% endif %}</div>
+  </div>
+  {% endfor %}
+  {% endif %}
+</div>
+</body>
+</html>

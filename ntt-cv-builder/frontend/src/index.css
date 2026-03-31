@@ -1,0 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  /* Core palette */
+  --bg:         #070b14;
+  --surface:    #0c1220;
+  --surface2:   #111828;
+  --surface3:   #192035;
+  --border:     rgba(255,255,255,0.07);
+  --border2:    rgba(255,255,255,0.12);
+
+  /* Brand */
+  --teal:       #00c896;
+  --teal-dim:   rgba(0,200,150,0.12);
+  --teal-glow:  rgba(0,200,150,0.06);
+  --navy:       #1a2035;
+  --rose:       #f43f5e;
+
+  /* Text */
+  --text:       #e8edf5;
+  --text2:      #8a95a8;
+  --text3:      #4a5468;
+
+  /* Semantic */
+  --user-msg:   #0f2235;
+  --ai-msg:     #0c1220;
+
+  /* Layout */
+  --chat-w:     420px;
+  --header-h:   56px;
+  --radius:     12px;
+  --radius-sm:  8px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border2); }
+
+/* Markdown inside chat */
+.md-content p { margin-bottom: 8px; }
+.md-content p:last-child { margin-bottom: 0; }
+.md-content strong { color: var(--text); font-weight: 600; }
+.md-content em { color: var(--text2); }
+.md-content ul, .md-content ol { padding-left: 18px; margin: 6px 0; }
+.md-content li { margin-bottom: 3px; }
+.md-content code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  background: var(--surface3);
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: var(--teal);
+}
+
+/* Animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+.animate-in {
+  animation: fadeUp 0.35s ease both;
+}
