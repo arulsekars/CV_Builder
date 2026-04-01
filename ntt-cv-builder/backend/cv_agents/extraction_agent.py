@@ -10,7 +10,7 @@ from typing import Any, Dict, List
 
 from openai import AsyncOpenAI
 
-from backend.core.schema import CVData, WorkExperience, Education, Certification, DateRange
+from core.schema import CVData, WorkExperience, Education, Certification, DateRange
 
 logger = logging.getLogger(__name__)
 

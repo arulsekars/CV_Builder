@@ -1,35 +1,60 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
+/* ── Dark theme (default) ─────────────────────────────── */
 :root {
-  /* Core palette */
   --bg:         #070b14;
   --surface:    #0c1220;
   --surface2:   #111828;
   --surface3:   #192035;
   --border:     rgba(255,255,255,0.07);
-  --border2:    rgba(255,255,255,0.12);
+  --border2:    rgba(255,255,255,0.14);
 
-  /* Brand */
   --teal:       #00c896;
   --teal-dim:   rgba(0,200,150,0.12);
   --teal-glow:  rgba(0,200,150,0.06);
   --navy:       #1a2035;
   --rose:       #f43f5e;
 
-  /* Text */
   --text:       #e8edf5;
-  --text2:      #8a95a8;
-  --text3:      #4a5468;
+  --text2:      #b0baca;
+  --text3:      #6b7a92;
 
-  /* Semantic */
   --user-msg:   #0f2235;
   --ai-msg:     #0c1220;
 
-  /* Layout */
+  --scrollbar-thumb: rgba(255,255,255,0.28);
+  --scrollbar-hover: rgba(255,255,255,0.45);
+
   --chat-w:     420px;
-  --header-h:   56px;
+  --header-h:   72px;
   --radius:     12px;
   --radius-sm:  8px;
+}
+
+/* ── Light theme ──────────────────────────────────────── */
+[data-theme="light"] {
+  --bg:         #f0f4f8;
+  --surface:    #ffffff;
+  --surface2:   #f8fafc;
+  --surface3:   #e2e8f0;
+  --border:     rgba(0,0,0,0.08);
+  --border2:    rgba(0,0,0,0.15);
+
+  --teal:       #00a87c;
+  --teal-dim:   rgba(0,168,124,0.10);
+  --teal-glow:  rgba(0,168,124,0.05);
+  --navy:       #e2e8f0;
+  --rose:       #e11d48;
+
+  --text:       #0f172a;
+  --text2:      #334155;
+  --text3:      #64748b;
+
+  --user-msg:   #dbeafe;
+  --ai-msg:     #f8fafc;
+
+  --scrollbar-thumb: rgba(0,0,0,0.25);
+  --scrollbar-hover: rgba(0,0,0,0.40);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -48,13 +73,18 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 5px; }
+/* ── Visible scrollbar ────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: var(--border2); }
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-hover);
+}
 
-/* Markdown inside chat */
+/* ── Markdown inside chat ─────────────────────────────── */
 .md-content p { margin-bottom: 8px; }
 .md-content p:last-child { margin-bottom: 0; }
 .md-content strong { color: var(--text); font-weight: 600; }
@@ -70,7 +100,7 @@ body {
   color: var(--teal);
 }
 
-/* Animations */
+/* ── Animations ───────────────────────────────────────── */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }

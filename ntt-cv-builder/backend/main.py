@@ -1,5 +1,5 @@
 """
-main.py — Contoso AI CV Builder
+main.py — NTT Data AI CV Builder
 FastAPI application entry point.
 
 Start with:
@@ -33,7 +33,7 @@ log = structlog.get_logger()
 # ── Lifespan: seed RAG on startup ────────────────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    log.info("Starting Contoso AI CV Builder...")
+    log.info("Starting NTT Data AI CV Builder...")
     try:
         from rag.ingestion import seed_knowledge_base
         seed_knowledge_base()
@@ -46,7 +46,7 @@ async def lifespan(app: FastAPI):
 
 # ── App ───────────────────────────────────────────────────────
 app = FastAPI(
-    title="Contoso AI CV Builder",
+    title="NTT Data AI CV Builder",
     description="AI-powered CV builder using OpenAI Agents SDK + RAG",
     version="1.0.0",
     lifespan=lifespan,
@@ -54,7 +54,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.allowed_origins,
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

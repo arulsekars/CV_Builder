@@ -144,6 +144,7 @@ export default function ChatPanel({
   onSend,
   onUploadComplete,
   isThinking,
+  voice,
 }) {
   const [input, setInput] = useState('')
   const bottomRef = useRef(null)
@@ -154,6 +155,15 @@ export default function ChatPanel({
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, isThinking])
+
+  // When mic stops, move transcript into the input box
+  useEffect(() => {
+    if (voice && !voice.isListening && voice.transcript) {
+      setInput(voice.transcript)
+      voice.clearTranscript()
+      textareaRef.current?.focus()
+    }
+  }, [voice?.isListening, voice?.transcript])
 
   const handleSend = useCallback(() => {
     const text = input.trim()
@@ -209,7 +219,7 @@ export default function ChatPanel({
           }}>✨</div>
           <div>
             <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--text)', lineHeight: 1.2 }}>
-              Contoso CV Builder
+              NTT Data CV Builder
             </div>
             <div style={{ fontSize: 10.5, color: 'var(--text3)', fontFamily: "'JetBrains Mono',monospace" }}>
               AI-powered · Phase 1 MVP
@@ -246,9 +256,11 @@ export default function ChatPanel({
 
       {/* Messages */}
       <div style={{
-        flex: 1, overflowY: 'auto',
+        flex: 1, minHeight: 0, overflowY: 'scroll',
         display: 'flex', flexDirection: 'column',
         gap: 2, padding: '12px 0 8px',
+        scrollbarWidth: 'thin',
+        scrollbarColor: 'var(--scrollbar-thumb) transparent',
       }}>
         {messages.map((msg, i) => (
           <Message key={i} msg={msg} />
@@ -319,12 +331,15 @@ export default function ChatPanel({
             value={input}
             onChange={e => {
               setInput(e.target.value)
-              // auto-resize
               e.target.style.height = 'auto'
               e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px'
             }}
             onKeyDown={handleKeyDown}
-            placeholder={connected ? 'Type your message… (Enter to send)' : 'Connecting…'}
+            placeholder={
+              voice?.isListening
+                ? '🎤 Listening…'
+                : connected ? 'Type or speak your message… (Enter to send)' : 'Connecting…'
+            }
             disabled={!connected || isThinking}
             rows={1}
             style={{
@@ -335,6 +350,35 @@ export default function ChatPanel({
               overflowY: 'auto',
             }}
           />
+
+          {/* Mic button */}
+          {voice?.inputSupported && (
+            <button
+              onClick={() => voice.isListening ? voice.stopListening() : voice.startListening()}
+              disabled={!connected || isThinking}
+              title={voice.isListening ? 'Stop recording' : 'Speak your message'}
+              style={{
+                width: 34, height: 34, borderRadius: 9, flexShrink: 0,
+                background: voice.isListening ? 'rgba(244,63,94,0.15)' : 'var(--surface3)',
+                border: `1px solid ${voice.isListening ? 'rgba(244,63,94,0.5)' : 'var(--border)'}`,
+                cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'all 0.2s',
+                animation: voice.isListening ? 'pulse 1s ease infinite' : 'none',
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke={voice.isListening ? '#f43f5e' : 'var(--text2)'}
+                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                <line x1="12" y1="19" x2="12" y2="23"/>
+                <line x1="8" y1="23" x2="16" y2="23"/>
+              </svg>
+            </button>
+          )}
+
+          {/* Send button */}
           <button
             onClick={handleSend}
             disabled={!connected || isThinking || !input.trim()}
@@ -358,11 +402,47 @@ export default function ChatPanel({
             ) : '↑'}
           </button>
         </div>
+
+        {/* Hint bar */}
         <div style={{
           marginTop: 6, fontSize: 10.5, color: 'var(--text3)',
-          textAlign: 'center', fontFamily: "'JetBrains Mono', monospace",
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          fontFamily: "'JetBrains Mono', monospace",
         }}>
-          Shift+Enter for new line · {connected ? '🟢 Connected' : '🔴 Reconnecting...'}
+          <span>Shift+Enter for new line · {connected ? '🟢 Connected' : '🔴 Reconnecting...'}</span>
+
+          {/* Auto-speak toggle */}
+          {voice?.outputSupported && (
+            <button
+              onClick={voice.toggleAutoSpeak}
+              title={voice.autoSpeak ? 'Mute AI replies' : 'Read AI replies aloud'}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 4,
+                background: 'none', border: 'none', cursor: 'pointer',
+                color: voice.autoSpeak ? 'var(--teal)' : 'var(--text3)',
+                fontSize: 10.5, fontFamily: 'inherit',
+                transition: 'color 0.2s',
+              }}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                {voice.autoSpeak ? (
+                  <>
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                  </>
+                ) : (
+                  <>
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                    <line x1="23" y1="9" x2="17" y2="15"/>
+                    <line x1="17" y1="9" x2="23" y2="15"/>
+                  </>
+                )}
+              </svg>
+              {voice.autoSpeak ? 'Voice on' : 'Voice off'}
+            </button>
+          )}
         </div>
       </div>
     </div>

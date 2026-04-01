@@ -14,7 +14,7 @@ const STAGE_LABELS = {
   done:       'CV Complete ✓',
 }
 
-export default function Header({ connected, stage, cvData }) {
+export default function Header({ connected, stage, cvData, theme, onToggleTheme }) {
   const completion = useMemo(() => {
     if (!cvData) return 0
     const checks = [
@@ -34,31 +34,33 @@ export default function Header({ connected, stage, cvData }) {
 
   return (
     <header style={{
-      height: 'var(--header-h)',
+      height: '72px',
       background: 'var(--surface)',
-      borderBottom: '1px solid var(--border)',
+      borderBottom: '2px solid var(--border2)',
       display: 'flex',
       alignItems: 'center',
-      padding: '0 20px',
-      gap: 12,
+      padding: '0 28px',
+      gap: 14,
       flexShrink: 0,
       zIndex: 10,
+      boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
     }}>
       {/* Logo */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <div style={{
-          width: 32, height: 32, borderRadius: 8,
+          width: 44, height: 44, borderRadius: 12,
           background: 'linear-gradient(135deg, #00c896 0%, #0094ff 100%)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 15, fontWeight: 700, color: 'white',
-        }}>C</div>
+          fontSize: 24,
+          boxShadow: '0 2px 8px rgba(0,200,150,0.3)',
+        }}>📄</div>
         <div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', lineHeight: 1.2 }}>
-            Contoso <span style={{ color: 'var(--teal)' }}>CV Builder</span>
+          <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', lineHeight: 1.2 }}>
+            NTT Data <span style={{ color: 'var(--teal)' }}>CV Builder</span>
           </div>
           <div style={{
-            fontSize: 10, color: 'var(--text3)',
-            fontFamily: "'JetBrains Mono', monospace", lineHeight: 1,
+            fontSize: 11, color: 'var(--text3)',
+            fontFamily: "'JetBrains Mono', monospace", lineHeight: 1.4,
           }}>
             AI-Powered · Phase 1
           </div>
@@ -69,10 +71,10 @@ export default function Header({ connected, stage, cvData }) {
       <div style={{
         marginLeft: 16,
         background: 'var(--surface2)',
-        border: '1px solid var(--border)',
+        border: '1px solid var(--border2)',
         borderRadius: 20,
-        padding: '3px 12px',
-        fontSize: 11,
+        padding: '5px 16px',
+        fontSize: 12,
         fontFamily: "'JetBrains Mono', monospace",
         color: stage === 'done' ? 'var(--teal)' : 'var(--text2)',
         fontWeight: 500,
@@ -109,6 +111,22 @@ export default function Header({ connected, stage, cvData }) {
           </span>
         </div>
       )}
+
+      {/* Theme toggle */}
+      <button
+        onClick={onToggleTheme}
+        title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+        style={{
+          width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+          background: 'var(--surface2)',
+          border: '1px solid var(--border2)',
+          cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 15, transition: 'background 0.2s',
+        }}
+      >
+        {theme === 'dark' ? '☀️' : '🌙'}
+      </button>
 
       {/* Connection dot */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

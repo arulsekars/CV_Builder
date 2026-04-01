@@ -8,7 +8,7 @@ import structlog
 from fastapi import APIRouter, File, UploadFile, HTTPException, Form
 from fastapi.responses import JSONResponse
 
-from agents.document_parser import parse_uploaded_file
+from cv_agents.document_parser import parse_uploaded_file
 from config import get_settings
 
 router = APIRouter()
@@ -50,18 +50,17 @@ async def upload_cv(
     log.info("Processing upload", filename=file.filename, size_mb=round(size_mb, 2), session_id=session_id)
 
     try:
-        cv_data = await parse_uploaded_file(file_bytes, file.filename)
+        text = parse_uploaded_file(file_bytes, file.filename)
 
-        # Also update the session orchestrator directly
+        # Update the session orchestrator directly
         from routers.chat import sessions
         if session_id in sessions:
             orchestrator = sessions[session_id]
-            async for event in orchestrator.process_uploaded_cv(cv_data):
-                pass  # Events are returned in the response below
+            async for _ in orchestrator.process_uploaded_cv(text):
+                pass  # Events are pushed via WebSocket separately
 
         return JSONResponse({
             "status": "ok",
-            "cv_data": cv_data.model_dump(),
             "message": f"Successfully parsed {file.filename}",
         })
 

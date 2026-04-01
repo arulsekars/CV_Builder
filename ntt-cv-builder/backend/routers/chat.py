@@ -13,7 +13,7 @@ import uuid
 import structlog
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from agents.orchestrator import CVOrchestrator
+from cv_agents.orchestrator import CVOrchestrator
 
 router = APIRouter()
 log = structlog.get_logger()
@@ -34,7 +34,7 @@ async def websocket_chat(websocket: WebSocket, session_id: str):
         await websocket.send_json({
             "type": "message",
             "data": (
-                "👋 Welcome to the **Contoso AI CV Builder**!\n\n"
+                "👋 Welcome to the **NTT Data AI CV Builder**!\n\n"
                 "I'll help you create a professional, polished CV through a quick conversation.\n\n"
                 "To get started — do you have an existing CV you'd like to upload and improve, "
                 "or would you prefer to build one from scratch?"
