@@ -1,4 +1,4 @@
-# Contoso AI CV Builder — Phase 1 MVP
+# NTTData AI CV Builder — Phase 1 MVP
 
 A fully conversational, AI-powered CV builder built with Python, FastAPI, the OpenAI Agents SDK, LangChain, and ChromaDB. Runs in the browser with a real-time WebSocket chat interface.
 
