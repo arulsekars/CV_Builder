@@ -91,7 +91,7 @@ Kubernetes CKA, PMP, Scrum Master, CISSP, Google Analytics, Salesforce Admin""",
         "metadata": {"type": "skills_guidance"},
     },
     {
-        "content": """CV structure best practices - Contoso guidelines:
+        "content": """CV structure best practices - NTT Data guidelines:
 1. Contact: Name, email, phone, LinkedIn, location (city/country only, no full address)
 2. Professional Summary: 2-4 sentences, tailored to target role, quantified where possible
 3. Work Experience: reverse chronological, 3-5 bullets per role, action verbs, metrics

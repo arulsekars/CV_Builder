@@ -1,7 +1,7 @@
 """
 renderers/docx_renderer.py
 Generates an editable Word DOCX from CVData using python-docx.
-Applies Contoso brand styles and section formatting.
+Applies NTT Data brand styles and section formatting.
 """
 from __future__ import annotations
 import io
@@ -11,7 +11,7 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.style import WD_STYLE_TYPE
 from schemas.cv_schema import CVData
 
-# Contoso brand colours
+# NTT Data brand colours
 BRAND_DARK = RGBColor(0x1a, 0x20, 0x35)       # Dark navy
 BRAND_PRIMARY = RGBColor(0x00, 0x8B, 0x6E)    # Teal
 BRAND_MUTED = RGBColor(0x5a, 0x64, 0x78)      # Grey

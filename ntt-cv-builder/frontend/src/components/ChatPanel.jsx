@@ -256,9 +256,11 @@ export default function ChatPanel({
 
       {/* Messages */}
       <div style={{
-        flex: 1, overflowY: 'auto',
+        flex: 1, minHeight: 0, overflowY: 'scroll',
         display: 'flex', flexDirection: 'column',
         gap: 2, padding: '12px 0 8px',
+        scrollbarWidth: 'thin',
+        scrollbarColor: 'var(--scrollbar-thumb) transparent',
       }}>
         {messages.map((msg, i) => (
           <Message key={i} msg={msg} />

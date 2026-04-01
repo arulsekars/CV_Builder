@@ -16,12 +16,22 @@ export default function App() {
   const [messages, setMessages] = useState([])
   const [cvData, setCvData] = useState(null)
   const [previewHtml, setPreviewHtml] = useState(null)
-  const [downloads, setDownloads] = useState(null)   // { pdf_b64, docx_b64, json, filename_stem }
-  const [stage, setStage] = useState('greeting')     // greeting | collecting | validating | template | preview | generating | done
+  const [downloads, setDownloads] = useState(null)
+  const [stage, setStage] = useState('greeting')
   const [isThinking, setIsThinking] = useState(false)
   const [validationData, setValidationData] = useState(null)
   const [progress, setProgress] = useState(null)
+  const [theme, setTheme] = useState('dark')
   const voice = useVoice()
+
+  // Apply theme to <html> so CSS [data-theme] selector works
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }, [theme])
+
+  const toggleTheme = useCallback(() => {
+    setTheme(t => t === 'dark' ? 'light' : 'dark')
+  }, [])
 
   // Init session on mount
   useEffect(() => {
@@ -106,10 +116,11 @@ export default function App() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
-      <Header connected={connected} stage={stage} cvData={cvData} />
+      <Header connected={connected} stage={stage} cvData={cvData} theme={theme} onToggleTheme={toggleTheme} />
 
       <div style={{
         flex: 1,
+        minHeight: 0,
         display: 'grid',
         gridTemplateColumns: showPreviewPanel ? 'var(--chat-w) 1fr' : '1fr',
         overflow: 'hidden',
